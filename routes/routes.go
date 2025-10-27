@@ -14,8 +14,9 @@ func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
 
 	// public API
 	router.GET("/ping", productHandler.Ping())
-	
+
 	// public product API (조회)
+	router.GET("/v1/products/search", productHandler.SearchProducts)
 	router.GET("/v1/products/:id", productHandler.GetProductById)
 	router.GET("/v1/product-categories/:id", productHandler.GetProductCategoryById)
 
@@ -27,11 +28,10 @@ func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
 		private.POST("/v1/products", productHandler.CreateNewProduct)
 		private.PUT("/v1/products/:id", productHandler.EditProduct)
 		private.DELETE("/v1/products/:id", productHandler.DeleteProduct)
-		
+
 		// 카테고리 관리
 		private.POST("/v1/product-categories", productHandler.CreateNewProductCategory)
 		private.PUT("/v1/product-categories/:id", productHandler.EditProductCategory)
 		private.DELETE("/v1/product-categories/:id", productHandler.DeleteProductCategory)
 	}
 }
-

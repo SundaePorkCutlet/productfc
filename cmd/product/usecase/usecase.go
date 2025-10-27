@@ -80,3 +80,11 @@ func (u *ProductUsecase) DeleteProduct(ctx context.Context, id int64) error {
 	}
 	return nil
 }
+
+func (u *ProductUsecase) SearchProducts(ctx context.Context, params models.SerachProductParameter) ([]models.Product, int, error) {
+	products, totalCount, err := u.ProductService.SearchProducts(ctx, params)
+	if err != nil {
+		return nil, 0, err
+	}
+	return products, totalCount, nil
+}

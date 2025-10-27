@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"productfc/cmd/product/repository"
+	"productfc/infrastructure/log"
 	"productfc/models"
 )
 
@@ -15,10 +16,28 @@ func NewProductService(productRepo repository.ProductRepository) *ProductService
 }
 
 func (s *ProductService) GetProductById(ctx context.Context, id int64) (*models.Product, error) {
-	product, err := s.ProductRepo.FindProductById(ctx, id)
+
+	product, err := s.ProductRepo.GetProductByIdFromRedis(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+	if product.ID > 0 {
+		// 캐시에 있으면 바로 반환
+		return product, nil
+	}
+
+	// 캐시에 없으면 DB에서 조회
+	product, err = s.ProductRepo.FindProductById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// 백그라운드로 캐시 저장
+	go func(product *models.Product) {
+		if err := s.ProductRepo.SetProductById(context.Background(), product); err != nil {
+			log.Logger.Error().Err(err).Msg("Failed to cache product")
+		}
+	}(product)
 	return product, nil
 }
 
@@ -76,4 +95,12 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (s *ProductService) SearchProducts(ctx context.Context, params models.SerachProductParameter) ([]models.Product, int, error) {
+	products, totalCount, err := s.ProductRepo.SearchProducts(ctx, params)
+	if err != nil {
+		return nil, 0, err
+	}
+	return products, totalCount, nil
 }

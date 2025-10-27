@@ -2,8 +2,9 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"productfc/models"
-	
+
 	"gorm.io/gorm"
 )
 
@@ -34,7 +35,7 @@ func (r *ProductRepository) InsertNewProduct(ctx context.Context, product *model
 		return 0, err
 	}
 	return product.ID, nil
-}	
+}
 
 func (r *ProductRepository) InsertNewProductCategory(ctx context.Context, productCategory *models.ProductCategory) (int, error) {
 	err := r.Database.WithContext(ctx).Table("product_categories").Create(productCategory).Error
@@ -66,7 +67,7 @@ func (r *ProductRepository) DeleteProductCategory(ctx context.Context, id int) e
 		return err
 	}
 	return nil
-}	
+}
 
 func (r *ProductRepository) DeleteProduct(ctx context.Context, id int64) error {
 	err := r.Database.WithContext(ctx).Table("products").Where("id = ?", id).Delete(&models.Product{ID: id}).Error
@@ -74,4 +75,48 @@ func (r *ProductRepository) DeleteProduct(ctx context.Context, id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (r *ProductRepository) SearchProducts(ctx context.Context, params models.SerachProductParameter) ([]models.Product, int, error) {
+	var products []models.Product
+	var totalCount int64
+	query := r.Database.WithContext(ctx).Table("products AS p").
+		Select("p.id", "p.name", "p.price", "p.description", "p.stock", "p.category_id").
+		Joins("JOIN product_categories AS pc ON p.category_id = pc.id")
+
+	if params.Name != "" {
+		query = query.Where("p.name ILIKE ?", "%"+params.Name+"%")
+	}
+	if params.Category != "" {
+		query = query.Where("pc.name = ?", params.Category)
+	}
+	if params.MinPrice != 0 {
+		query = query.Where("p.price >= ?", params.MinPrice)
+	}
+	if params.MaxPrice != 0 {
+		query = query.Where("p.price <= ?", params.MaxPrice)
+	}
+
+	//pagination
+	query.Model(&models.Product{}).Count(&totalCount)
+
+	if params.OrderBy == "" {
+		params.OrderBy = "p.name"
+	}
+
+	if params.Sort != "asc" && params.Sort != "desc" {
+		params.Sort = "asc"
+	}
+
+	orderBy := fmt.Sprintf("%s %s", params.OrderBy, params.Sort)
+	query = query.Order(orderBy)
+
+	offset := (params.Page - 1) * params.PageSize
+	query = query.Offset(int(offset)).Limit(int(params.PageSize))
+
+	err := query.Scan(&products).Error
+	if err != nil {
+		return products, 0, err
+	}
+	return products, int(totalCount), nil
 }
