@@ -17,7 +17,7 @@ func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
 
 	// public product API (조회)
 	router.GET("/v1/products/search", productHandler.SearchProducts)
-	router.GET("/v1/products/:id", productHandler.GetProductById)
+	router.GET("/v1/products/:id", productHandler.GetProductInfo)
 	router.GET("/v1/product-categories/:id", productHandler.GetProductCategoryById)
 
 	// private API (인증 필요)

@@ -49,7 +49,7 @@ func (s *ProductService) GetProductCategoryById(ctx context.Context, id int) (*m
 	return productCategory, nil
 }
 
-func (s *ProductService) CreateNewProduct(ctx context.Context, product *models.Product) (int64, error) {
+func (s *ProductService) InsertNewProduct(ctx context.Context, product *models.Product) (int64, error) {
 	productID, err := s.ProductRepo.InsertNewProduct(ctx, product)
 	if err != nil {
 		return 0, err
@@ -57,28 +57,29 @@ func (s *ProductService) CreateNewProduct(ctx context.Context, product *models.P
 	return productID, nil
 }
 
-func (s *ProductService) CreateNewProductCategory(ctx context.Context, productCategory *models.ProductCategory) (int, error) {
+func (s *ProductService) InsertNewProductCategory(ctx context.Context, productCategory *models.ProductCategory) (int, error) {
 	productCategoryID, err := s.ProductRepo.InsertNewProductCategory(ctx, productCategory)
 	if err != nil {
 		return 0, err
 	}
+
 	return productCategoryID, nil
 }
 
 func (s *ProductService) EditProduct(ctx context.Context, product *models.Product) (*models.Product, error) {
-	updatedProduct, err := s.ProductRepo.UpdateProduct(ctx, product)
+	product, err := s.ProductRepo.UpdateProduct(ctx, product)
 	if err != nil {
 		return nil, err
 	}
-	return updatedProduct, nil
+	return product, nil
 }
 
 func (s *ProductService) EditProductCategory(ctx context.Context, productCategory *models.ProductCategory) (*models.ProductCategory, error) {
-	updatedCategory, err := s.ProductRepo.UpdateProductCategory(ctx, productCategory)
+	productCategory, err := s.ProductRepo.UpdateProductCategory(ctx, productCategory)
 	if err != nil {
 		return nil, err
 	}
-	return updatedCategory, nil
+	return productCategory, nil
 }
 
 func (s *ProductService) DeleteProductCategory(ctx context.Context, id int) error {

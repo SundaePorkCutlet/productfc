@@ -4,7 +4,6 @@ type Config struct {
 	App      AppConfig      `yaml:"app" validate:"required"`
 	Database DatabaseConfig `yaml:"database" validate:"required"`
 	Redis    RedisConfig    `yaml:"redis" validate:"required"`
-	Secret   SecretConfig   `yaml:"secret" validate:"required"`
 }
 
 type AppConfig struct {
@@ -23,9 +22,5 @@ type RedisConfig struct {
 	Host     string `yaml:"host" validate:"required"`
 	Port     string `yaml:"port" validate:"required"`
 	Password string `yaml:"password" validate:"required"`
-}
-
-type SecretConfig struct {
-	JwtSecret string `yaml:"jwt_secret" validate:"required"`
 }
 

@@ -27,4 +27,3 @@ func LoadConfig() Config {
 func GetJwtSecret() string {
 	return viper.GetString("secret.jwt_secret")
 }
-

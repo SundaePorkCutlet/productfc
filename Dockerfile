@@ -10,9 +10,6 @@ RUN go mod download
 # 소스 코드 복사
 COPY . .
 
-# go.mod 업데이트
-RUN go mod tidy
-
 # 애플리케이션 빌드
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
@@ -25,11 +22,11 @@ WORKDIR /root/
 # 빌드된 바이너리 복사
 COPY --from=builder /app/main .
 
-# 설정 파일 복사
+# config 파일 복사
 COPY --from=builder /app/files/config ./files/config
 
 # 포트 노출
-EXPOSE 8080
+EXPOSE 8081
 
 # 애플리케이션 실행
 CMD ["./main"]

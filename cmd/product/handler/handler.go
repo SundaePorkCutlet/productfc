@@ -25,7 +25,7 @@ func (h *ProductHandler) Ping() gin.HandlerFunc {
 	}
 }
 
-func (h *ProductHandler) GetProductById(c *gin.Context) {
+func (h *ProductHandler) GetProductInfo(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {

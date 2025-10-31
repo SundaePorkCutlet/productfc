@@ -32,7 +32,7 @@ func (u *ProductUsecase) GetProductCategoryById(ctx context.Context, id int) (*m
 }
 
 func (u *ProductUsecase) CreateNewProduct(ctx context.Context, product *models.Product) (*models.Product, error) {
-	productID, err := u.ProductService.CreateNewProduct(ctx, product)
+	productID, err := u.ProductService.InsertNewProduct(ctx, product)
 	if err != nil {
 		log.Logger.Info().Err(err).Msgf("Error creating new product: %s", err.Error())
 		return nil, err
@@ -42,7 +42,7 @@ func (u *ProductUsecase) CreateNewProduct(ctx context.Context, product *models.P
 }
 
 func (u *ProductUsecase) CreateNewProductCategory(ctx context.Context, productCategory *models.ProductCategory) (*models.ProductCategory, error) {
-	productCategoryID, err := u.ProductService.CreateNewProductCategory(ctx, productCategory)
+	productCategoryID, err := u.ProductService.InsertNewProductCategory(ctx, productCategory)
 	if err != nil {
 		log.Logger.Info().Err(err).Msgf("Error creating new product category: %s", err.Error())
 		return nil, err
