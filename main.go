@@ -23,7 +23,7 @@ func main() {
 	db := resource.InitDB(cfg.Database)
 
 	// AutoMigrate: 데이터베이스 테이블 자동 생성/업데이트
-	if err := db.AutoMigrate(&models.Product{}); err != nil {
+	if err := db.AutoMigrate(&models.ProductCategory{}, &models.Product{}); err != nil {
 		log.Logger.Fatal().Err(err).Msg("Failed to migrate database")
 	}
 	log.Logger.Info().Msg("Database migration completed")
