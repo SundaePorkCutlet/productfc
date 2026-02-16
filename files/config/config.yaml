@@ -2,11 +2,11 @@ app:
   port: 8081
 
 database:
-  host: postgres
+  host: postgres-product
   port: 5432
   user: admin
   password: admin
-  name: postgres
+  name: product
 
 redis:
   host: redis
