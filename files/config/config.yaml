@@ -13,3 +13,8 @@ redis:
   port: 6379
   password: admin
 
+tracing:
+  endpoint: jaeger:4318
+  service_name: productfc
+  enabled: true
+

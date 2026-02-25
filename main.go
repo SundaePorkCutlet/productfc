@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"productfc/cmd/product/handler"
 	"productfc/cmd/product/repository"
 	"productfc/cmd/product/resource"
@@ -10,6 +11,7 @@ import (
 	"productfc/infrastructure/log"
 	"productfc/models"
 	"productfc/routes"
+	"productfc/tracing"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +20,14 @@ func main() {
 	cfg := config.LoadConfig()
 
 	log.SetupLogger()
+
+	// Tracing 초기화
+	shutdownTracer, err := tracing.InitTracer(cfg.Tracing)
+	if err != nil {
+		log.Logger.Warn().Err(err).Msg("Failed to initialize tracing - continuing without tracing")
+	} else {
+		defer shutdownTracer(context.Background())
+	}
 
 	redis := resource.InitRedis(cfg.Redis)
 	db := resource.InitDB(cfg.Database)
@@ -35,6 +45,11 @@ func main() {
 
 	port := cfg.App.Port
 	router := gin.Default()
+
+	// 트레이싱 미들웨어 추가
+	if cfg.Tracing.Enabled {
+		router.Use(tracing.GinMiddleware(cfg.Tracing.ServiceName))
+	}
 
 	routes.SetupRoutes(router, productHandler)
 
