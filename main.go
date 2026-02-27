@@ -9,6 +9,7 @@ import (
 	"productfc/cmd/product/usecase"
 	"productfc/config"
 	"productfc/infrastructure/log"
+	"productfc/kafka/consumer"
 	"productfc/models"
 	"productfc/routes"
 	"productfc/tracing"
@@ -42,6 +43,9 @@ func main() {
 	productService := service.NewProductService(*productRepository)
 	productUsecase := usecase.NewProductUsecase(*productService)
 	productHandler := handler.NewProductHandler(*productUsecase)
+
+	kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer([]string{"kafka:9093"}, "stock.updated")
+	kafkaProductUpdateStockConsumer.Start(context.Background())
 
 	port := cfg.App.Port
 	router := gin.Default()

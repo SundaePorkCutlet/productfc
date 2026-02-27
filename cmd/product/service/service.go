@@ -105,3 +105,19 @@ func (s *ProductService) SearchProducts(ctx context.Context, params models.Serac
 	}
 	return products, totalCount, nil
 }
+
+func (s *ProductService) UpdateProductStockByProductID(ctx context.Context, productID int64, qty int) error {
+	err := s.ProductRepo.UpdateProductStockByProductID(ctx, productID, qty)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *ProductService) AddProductStockByProductID(ctx context.Context, productID int64, qty int) error {
+	err := s.ProductRepo.AddProductStockByProductID(ctx, productID, qty)
+	if err != nil {
+		return err
+	}
+	return nil
+}
