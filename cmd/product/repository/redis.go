@@ -40,6 +40,7 @@ func (r *ProductRepository) GetProductCategoryByIdFromRedis(ctx context.Context,
 		if err == redis.Nil {
 			return nil, errors.New("product category not found")
 		}
+		return nil, err
 	}
 	var productCategory models.ProductCategory
 	err = json.Unmarshal([]byte(productCategoryString), &productCategory)

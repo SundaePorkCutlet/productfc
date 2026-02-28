@@ -10,7 +10,7 @@ import (
 
 func (r *ProductRepository) FindProductById(ctx context.Context, id int64) (*models.Product, error) {
 	var product models.Product
-	err := r.Database.WithContext(ctx).Table("products").Where("id = ?", id).Last(&product).Error
+	err := r.Database.WithContext(ctx).Table("products").Where("id = ?", id).First(&product).Error
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (r *ProductRepository) DeleteProduct(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (r *ProductRepository) SearchProducts(ctx context.Context, params models.SerachProductParameter) ([]models.Product, int, error) {
+func (r *ProductRepository) SearchProducts(ctx context.Context, params models.SearchProductParameter) ([]models.Product, int, error) {
 	var products []models.Product
 	var totalCount int64
 	query := r.Database.WithContext(ctx).Table("products AS p").
@@ -103,11 +103,18 @@ func (r *ProductRepository) SearchProducts(ctx context.Context, params models.Se
 	if params.OrderBy == "" {
 		params.OrderBy = "p.name"
 	}
-
+	orderByColumn := map[string]bool{
+		"p.id": true, "p.name": true, "p.price": true, "p.stock": true, "p.category_id": true,
+		"id": true, "name": true, "price": true, "stock": true, "category_id": true,
+	}
+	if !orderByColumn[params.OrderBy] {
+		params.OrderBy = "p.name"
+	} else if params.OrderBy == "id" || params.OrderBy == "name" || params.OrderBy == "price" || params.OrderBy == "stock" || params.OrderBy == "category_id" {
+		params.OrderBy = "p." + params.OrderBy
+	}
 	if params.Sort != "asc" && params.Sort != "desc" {
 		params.Sort = "asc"
 	}
-
 	orderBy := fmt.Sprintf("%s %s", params.OrderBy, params.Sort)
 	query = query.Order(orderBy)
 

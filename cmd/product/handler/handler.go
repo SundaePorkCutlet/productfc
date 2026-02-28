@@ -220,7 +220,7 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 }
 
 func (h *ProductHandler) SearchProducts(c *gin.Context) {
-	params := models.SerachProductParameter{
+	params := models.SearchProductParameter{
 		Name:     c.Query("name"),
 		Category: c.Query("category"),
 		OrderBy:  c.Query("order_by"),

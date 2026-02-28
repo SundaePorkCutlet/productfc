@@ -6,12 +6,13 @@ import (
 	"productfc/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
-	// 미들웨어 설정
 	router.Use(middleware.RequestLogger())
-
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// public API
 	router.GET("/ping", productHandler.Ping())
 

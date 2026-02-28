@@ -98,7 +98,7 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (s *ProductService) SearchProducts(ctx context.Context, params models.SerachProductParameter) ([]models.Product, int, error) {
+func (s *ProductService) SearchProducts(ctx context.Context, params models.SearchProductParameter) ([]models.Product, int, error) {
 	products, totalCount, err := s.ProductRepo.SearchProducts(ctx, params)
 	if err != nil {
 		return nil, 0, err

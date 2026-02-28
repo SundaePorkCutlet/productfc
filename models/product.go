@@ -15,7 +15,7 @@ type Product struct {
 	Category    ProductCategory `gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE" json:"category"`
 }
 
-type SerachProductParameter struct {
+type SearchProductParameter struct {
 	Name     string  `json:"name"`
 	Category string  `json:"category"`
 	MinPrice float64 `json:"minPrice"`

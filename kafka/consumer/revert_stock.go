@@ -37,7 +37,7 @@ func (c *ProductRollbackStockConsumer) Start(ctx context.Context) {
 			continue
 		}
 		for _, product := range event.Products {
-			err = c.ProductService.AddProductStockByProductID(ctx, product.ProductID, product.Qty)
+			err = c.ProductService.AddProductStockByProductID(ctx, product.ProductID, product.Quantity)
 			if err != nil {
 				log.Logger.Error().Err(err).Msg("Failed to add product stock")
 				continue

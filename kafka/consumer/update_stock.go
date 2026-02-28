@@ -15,13 +15,13 @@ type ProductUpdateStockConsumer struct {
 	ProductService *service.ProductService
 }
 
-func NewProductUpdateStockConsumer(brokers []string, topic string) *ProductUpdateStockConsumer {
+func NewProductUpdateStockConsumer(brokers []string, topic string, productService *service.ProductService) *ProductUpdateStockConsumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: brokers,
 		Topic:   topic,
 		GroupID: "productfc",
 	})
-	return &ProductUpdateStockConsumer{Reader: reader}
+	return &ProductUpdateStockConsumer{Reader: reader, ProductService: productService}
 }
 
 func (c *ProductUpdateStockConsumer) Start(ctx context.Context) {
@@ -39,7 +39,7 @@ func (c *ProductUpdateStockConsumer) Start(ctx context.Context) {
 		}
 
 		for _, product := range event.Products {
-			err = c.ProductService.UpdateProductStockByProductID(ctx, product.ProductID, product.Qty)
+			err = c.ProductService.UpdateProductStockByProductID(ctx, product.ProductID, product.Quantity)
 			if err != nil {
 				log.Logger.Error().Err(err).Msg("Failed to update product stock")
 				continue

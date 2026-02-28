@@ -14,9 +14,17 @@ import (
 	"productfc/routes"
 	"productfc/tracing"
 
+	_ "productfc/docs"
+
 	"github.com/gin-gonic/gin"
 )
 
+// @title           PRODUCTFC API
+// @version         1.0
+// @description     Product catalog, categories, and inventory for Go Commerce.
+// @host            localhost:28081
+// @BasePath        /
+// @schemes         http
 func main() {
 	cfg := config.LoadConfig()
 
@@ -44,8 +52,14 @@ func main() {
 	productUsecase := usecase.NewProductUsecase(*productService)
 	productHandler := handler.NewProductHandler(*productUsecase)
 
-	kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer([]string{"kafka:9093"}, "stock.updated")
-	kafkaProductUpdateStockConsumer.Start(context.Background())
+	brokers := []string{"kafka:9092"}
+	kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer(brokers, "stock.updated", productService)
+	go kafkaProductUpdateStockConsumer.Start(context.Background())
+	log.Logger.Info().Msg("Kafka stock.updated consumer started")
+
+	kafkaProductRollbackConsumer := consumer.NewProductRollbackStockConsumer(brokers, "stock.rollback", productService)
+	go kafkaProductRollbackConsumer.Start(context.Background())
+	log.Logger.Info().Msg("Kafka stock.rollback consumer started")
 
 	port := cfg.App.Port
 	router := gin.Default()
@@ -57,7 +71,6 @@ func main() {
 
 	routes.SetupRoutes(router, productHandler)
 
-	router.Run(":" + port)
-
 	log.Logger.Info().Msgf("Server is running on port %s", port)
+	router.Run(":" + port)
 }
