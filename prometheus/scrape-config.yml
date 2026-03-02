@@ -1,0 +1,11 @@
+# PRODUCTFC 메트릭 스크랩 설정 (중앙 Prometheus에서 참조/병합용)
+# docker-compose 내부: productfc:8081
+scrape_configs:
+  - job_name: productfc
+    static_configs:
+      - targets:
+          - productfc:8081
+        labels:
+          service: productfc
+    metrics_path: /metrics
+    scrape_interval: 15s
