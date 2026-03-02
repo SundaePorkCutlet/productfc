@@ -13,4 +13,3 @@ type ProductRepository struct {
 func NewProductRepository(db *gorm.DB, redis *redis.Client) *ProductRepository {
 	return &ProductRepository{Database: db, Redis: redis}
 }
-

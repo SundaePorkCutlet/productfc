@@ -30,4 +30,3 @@ type RedisConfig struct {
 	Port     string `yaml:"port" validate:"required"`
 	Password string `yaml:"password" validate:"required"`
 }
-

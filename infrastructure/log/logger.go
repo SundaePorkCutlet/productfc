@@ -41,4 +41,3 @@ func LogWithTrace(ctx context.Context) *zerolog.Event {
 	traceID := span.SpanContext().TraceID().String()
 	return Logger.Info().Str("trace_id", traceID)
 }
-
