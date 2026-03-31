@@ -6,6 +6,7 @@ import (
 	"productfc/models"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func (r *ProductRepository) FindProductById(ctx context.Context, id int64) (*models.Product, error) {
@@ -129,21 +130,26 @@ func (r *ProductRepository) SearchProducts(ctx context.Context, params models.Se
 }
 
 func (r *ProductRepository) UpdateProductStockByProductID(ctx context.Context, productID int64, qty int) error {
-	err := r.Database.WithContext(ctx).Table("products").Where("id = ?", productID).Updates(map[string]interface{}{
-		"stock": gorm.Expr("stock - ?", qty),
-	}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return r.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var product models.Product
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ?", productID).First(&product).Error; err != nil {
+			return err
+		}
+		if product.Stock < qty {
+			return fmt.Errorf("insufficient stock for product %d: available=%d, requested=%d", productID, product.Stock, qty)
+		}
+		return tx.Model(&product).Update("stock", gorm.Expr("stock - ?", qty)).Error
+	})
 }
 
 func (r *ProductRepository) AddProductStockByProductID(ctx context.Context, productID int64, qty int) error {
-	err := r.Database.WithContext(ctx).Table("products").Where("id = ?", productID).Updates(map[string]interface{}{
-		"stock": gorm.Expr("stock + ?", qty),
-	}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return r.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var product models.Product
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("id = ?", productID).First(&product).Error; err != nil {
+			return err
+		}
+		return tx.Model(&product).Update("stock", gorm.Expr("stock + ?", qty)).Error
+	})
 }

@@ -7,11 +7,11 @@ type ProductCategory struct {
 
 type Product struct {
 	ID          int64           `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name        string          `gorm:"type:varchar(255);not null" json:"name"`
+	Name        string          `gorm:"type:varchar(255);not null;index:idx_products_name" json:"name"`
 	Description string          `gorm:"type:text" json:"description"`
-	Price       float64         `gorm:"type:numeric;not null" json:"price"`
+	Price       float64         `gorm:"type:numeric;not null;index:idx_products_price" json:"price"`
 	Stock       int             `gorm:"type:integer;not null" json:"stock"`
-	CategoryID  int             `gorm:"type:integer;not null" json:"category_id"`
+	CategoryID  int             `gorm:"type:integer;not null;index:idx_products_category" json:"category_id"`
 	Category    ProductCategory `gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE" json:"category"`
 }
 

@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"net/http"
 	"productfc/cmd/product/handler"
+	"productfc/cmd/product/resource"
 	"productfc/config"
 	"productfc/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -13,24 +16,34 @@ import (
 func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
 	router.Use(middleware.RequestLogger())
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	// public API
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	router.GET("/ping", productHandler.Ping())
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "healthy",
+			"service": "productfc",
+		})
+	})
 
-	// public product API (조회)
+	router.GET("/debug/queries", func(c *gin.Context) {
+		if resource.DBMonitor == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "monitor not initialized"})
+			return
+		}
+		c.JSON(http.StatusOK, resource.DBMonitor.GetDebugInfo())
+	})
+
 	router.GET("/v1/products/search", productHandler.SearchProducts)
 	router.GET("/v1/products/:id", productHandler.GetProductInfo)
 	router.GET("/v1/product-categories/:id", productHandler.GetProductCategoryById)
 
-	// private API (인증 필요)
 	private := router.Group("/api")
 	private.Use(middleware.AuthMiddleware(config.GetJwtSecret()))
 	{
-		// 상품 관리
 		private.POST("/v1/products", productHandler.CreateNewProduct)
 		private.PUT("/v1/products/:id", productHandler.EditProduct)
 		private.DELETE("/v1/products/:id", productHandler.DeleteProduct)
 
-		// 카테고리 관리
 		private.POST("/v1/product-categories", productHandler.CreateNewProductCategory)
 		private.PUT("/v1/product-categories/:id", productHandler.EditProductCategory)
 		private.DELETE("/v1/product-categories/:id", productHandler.DeleteProductCategory)
