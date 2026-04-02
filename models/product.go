@@ -34,3 +34,9 @@ type SearchProductResponse struct {
 	TotalPages  int       `json:"totalPages"`
 	NextPageUrl string    `json:"nextPageUrl"`
 }
+
+type ProductRankingItem struct {
+	ProductID   int64   `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	ViewCount   float64 `json:"view_count"`
+}

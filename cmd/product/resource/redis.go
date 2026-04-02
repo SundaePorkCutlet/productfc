@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"productfc/config"
 	"productfc/infrastructure/log"
+	"productfc/infrastructure/redismonitor"
 
 	"github.com/redis/go-redis/v9"
 )
 
 var RedisClient *redis.Client
+var RedisMonitor *redismonitor.Monitor
 
 func InitRedis(cfg config.RedisConfig) *redis.Client {
 	RedisClient = redis.NewClient(&redis.Options{

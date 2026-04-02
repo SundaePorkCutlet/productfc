@@ -88,3 +88,7 @@ func (u *ProductUsecase) SearchProducts(ctx context.Context, params models.Searc
 	}
 	return products, totalCount, nil
 }
+
+func (u *ProductUsecase) GetTopProducts(ctx context.Context, limit int64) ([]models.ProductRankingItem, error) {
+	return u.ProductService.GetTopProducts(ctx, limit)
+}

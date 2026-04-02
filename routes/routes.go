@@ -33,6 +33,15 @@ func SetupRoutes(router *gin.Engine, productHandler *handler.ProductHandler) {
 		c.JSON(http.StatusOK, resource.DBMonitor.GetDebugInfo())
 	})
 
+	router.GET("/debug/redis", func(c *gin.Context) {
+		if resource.RedisMonitor == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "redis monitor not initialized"})
+			return
+		}
+		c.JSON(http.StatusOK, resource.RedisMonitor.GetDebugInfo(c.Request.Context()))
+	})
+
+	router.GET("/v1/products/ranking", productHandler.GetProductRanking)
 	router.GET("/v1/products/search", productHandler.SearchProducts)
 	router.GET("/v1/products/:id", productHandler.GetProductInfo)
 	router.GET("/v1/product-categories/:id", productHandler.GetProductCategoryById)

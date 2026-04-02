@@ -219,6 +219,31 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
 
+func (h *ProductHandler) GetProductRanking(c *gin.Context) {
+	limitStr := c.DefaultQuery("limit", "10")
+	limit, err := strconv.ParseInt(limitStr, 10, 64)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	ranking, err := h.ProductUsecase.GetTopProducts(c.Request.Context(), limit)
+	if err != nil {
+		log.Logger.Error().Err(err).Msg("Error getting product ranking")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx := c.Request.Context()
+	for i, item := range ranking {
+		product, err := h.ProductUsecase.GetProductById(ctx, item.ProductID)
+		if err == nil && product != nil {
+			ranking[i].ProductName = product.Name
+		}
+	}
+
+	c.JSON(http.StatusOK, ranking)
+}
+
 func (h *ProductHandler) SearchProducts(c *gin.Context) {
 	params := models.SearchProductParameter{
 		Name:     c.Query("name"),

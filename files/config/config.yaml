@@ -13,6 +13,9 @@ redis:
   port: 6379
   password: admin
 
+secret:
+  jwt_secret: secret301
+
 tracing:
   endpoint: jaeger:4318
   service_name: productfc

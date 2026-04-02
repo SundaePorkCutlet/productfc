@@ -67,3 +67,44 @@ func (r *ProductRepository) SetProductCategoryById(ctx context.Context, productC
 	}
 	return r.Redis.Set(ctx, cacheKey, productCategoryJSON, time.Minute*5).Err()
 }
+
+func (r *ProductRepository) InvalidateProductCache(ctx context.Context, productID int64) error {
+	cacheKey := fmt.Sprintf(cacheKeyProductInfo, productID)
+	return r.Redis.Del(ctx, cacheKey).Err()
+}
+
+func (r *ProductRepository) InvalidateProductCategoryCache(ctx context.Context, categoryID int) error {
+	cacheKey := fmt.Sprintf(cacheKeyProductCategoryInfo, categoryID)
+	return r.Redis.Del(ctx, cacheKey).Err()
+}
+
+const rankingKeyProductViews = "ranking:product_views"
+
+func (r *ProductRepository) IncrementProductView(ctx context.Context, productID int64) error {
+	member := fmt.Sprintf("%d", productID)
+	return r.Redis.ZIncrBy(ctx, rankingKeyProductViews, 1, member).Err()
+}
+
+func (r *ProductRepository) GetTopProducts(ctx context.Context, limit int64) ([]models.ProductRankingItem, error) {
+	results, err := r.Redis.ZRevRangeWithScores(ctx, rankingKeyProductViews, 0, limit-1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]models.ProductRankingItem, 0, len(results))
+	for _, z := range results {
+		memberStr, ok := z.Member.(string)
+		if !ok {
+			continue
+		}
+		var productID int64
+		if _, err := fmt.Sscanf(memberStr, "%d", &productID); err != nil {
+			continue
+		}
+		items = append(items, models.ProductRankingItem{
+			ProductID: productID,
+			ViewCount: z.Score,
+		})
+	}
+	return items, nil
+}
