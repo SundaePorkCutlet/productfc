@@ -8,9 +8,13 @@ import (
 	"productfc/cmd/product/service"
 	"productfc/cmd/product/usecase"
 	"productfc/config"
+	"productfc/infrastructure/kafkamonitor"
 	"productfc/infrastructure/log"
 	"productfc/infrastructure/redismonitor"
+	kafkapkg "productfc/kafka"
 	"productfc/kafka/consumer"
+	"productfc/kafka/dlq"
+	"productfc/kafka/idempotency"
 	"productfc/models"
 	"productfc/routes"
 	"productfc/tracing"
@@ -56,12 +60,29 @@ func main() {
 	productHandler := handler.NewProductHandler(*productUsecase)
 
 	brokers := []string{"kafka:9092"}
-	kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer(brokers, "stock.updated", productService)
-	go kafkaProductUpdateStockConsumer.Start(context.Background())
+	idemStore := idempotency.NewStore(redis)
+	dlqUpdated := dlq.NewPublisher(brokers, kafkapkg.TopicDLQStockUpdated)
+	dlqRollback := dlq.NewPublisher(brokers, kafkapkg.TopicDLQStockRollback)
+	defer func() {
+		_ = dlqUpdated.Close()
+		_ = dlqRollback.Close()
+	}()
+	resource.KafkaMonitor = kafkamonitor.NewMonitor()
+
+	go func() {
+		kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer(
+			brokers, kafkapkg.TopicStockUpdated, productService, idemStore, dlqUpdated, resource.KafkaMonitor,
+		)
+		kafkaProductUpdateStockConsumer.Start(context.Background())
+	}()
 	log.Logger.Info().Msg("Kafka stock.updated consumer started")
 
-	kafkaProductRollbackConsumer := consumer.NewProductRollbackStockConsumer(brokers, "stock.rollback", productService)
-	go kafkaProductRollbackConsumer.Start(context.Background())
+	go func() {
+		kafkaProductRollbackConsumer := consumer.NewProductRollbackStockConsumer(
+			brokers, kafkapkg.TopicStockRollback, productService, idemStore, dlqRollback, resource.KafkaMonitor,
+		)
+		kafkaProductRollbackConsumer.Start(context.Background())
+	}()
 	log.Logger.Info().Msg("Kafka stock.rollback consumer started")
 
 	port := cfg.App.Port

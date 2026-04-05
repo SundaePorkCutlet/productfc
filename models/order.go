@@ -3,9 +3,11 @@ package models
 import "time"
 
 type ProductStockUpdatedEvent struct {
-	OrderID   int64         `json:"order_id"`
-	Products  []ProductItem `json:"products"`
-	EventTime time.Time     `json:"event_time"`
+	SchemaVersion int           `json:"schema_version"`
+	OrderID       int64         `json:"order_id"`
+	UserID        int64         `json:"user_id"`
+	Products      []ProductItem `json:"products"`
+	EventTime     time.Time     `json:"event_time"`
 }
 
 type ProductItem struct {
@@ -14,7 +16,9 @@ type ProductItem struct {
 }
 
 type ProductStockRollbackEvent struct {
-	OrderID   int64         `json:"order_id"`
-	Products  []ProductItem `json:"products"`
-	EventTime time.Time     `json:"event_time"`
+	SchemaVersion int           `json:"schema_version"`
+	OrderID       int64         `json:"order_id"`
+	UserID        int64         `json:"user_id"`
+	Products      []ProductItem `json:"products"`
+	EventTime     time.Time     `json:"event_time"`
 }
