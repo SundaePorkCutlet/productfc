@@ -67,3 +67,11 @@ func InitTracer(cfg config.TracingConfig) (func(context.Context) error, error) {
 func GetTracer() trace.Tracer {
 	return tracer
 }
+
+// StartSpan creates a child span when tracing is enabled; otherwise returns ctx unchanged.
+func StartSpan(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+	if tracer == nil {
+		return ctx, trace.SpanFromContext(ctx)
+	}
+	return tracer.Start(ctx, name, opts...)
+}

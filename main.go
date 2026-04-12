@@ -16,6 +16,7 @@ import (
 	"productfc/kafka/dlq"
 	"productfc/kafka/idempotency"
 	"productfc/models"
+	"productfc/middleware"
 	"productfc/routes"
 	"productfc/tracing"
 
@@ -87,6 +88,7 @@ func main() {
 
 	port := cfg.App.Port
 	router := gin.Default()
+	router.Use(middleware.PrometheusRED("productfc"))
 
 	// 트레이싱 미들웨어 추가
 	if cfg.Tracing.Enabled {
