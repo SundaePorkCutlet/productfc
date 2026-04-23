@@ -25,6 +25,16 @@ func (h *ProductHandler) Ping() gin.HandlerFunc {
 	}
 }
 
+// GetProductInfo godoc
+// @Summary 상품 단건 조회
+// @Description 상품 ID로 상품 정보를 조회합니다.
+// @Tags PRODUCT
+// @Produce json
+// @Param id path int true "상품 ID"
+// @Success 200 {object} models.Product
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/products/{id} [get]
 func (h *ProductHandler) GetProductInfo(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -49,6 +59,16 @@ func (h *ProductHandler) GetProductInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, product)
 }
 
+// GetProductCategoryById godoc
+// @Summary 카테고리 단건 조회
+// @Description 카테고리 ID로 카테고리를 조회합니다.
+// @Tags PRODUCT
+// @Produce json
+// @Param id path int true "카테고리 ID"
+// @Success 200 {object} models.ProductCategory
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/product-categories/{id} [get]
 func (h *ProductHandler) GetProductCategoryById(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -73,6 +93,18 @@ func (h *ProductHandler) GetProductCategoryById(c *gin.Context) {
 	c.JSON(http.StatusOK, productCategory)
 }
 
+// CreateNewProduct godoc
+// @Summary 상품 생성
+// @Description 새로운 상품을 생성합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param body body models.Product true "상품 생성 요청"
+// @Success 201 {object} models.Product
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/products [post]
 func (h *ProductHandler) CreateNewProduct(c *gin.Context) {
 	var product models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
@@ -90,6 +122,18 @@ func (h *ProductHandler) CreateNewProduct(c *gin.Context) {
 	c.JSON(http.StatusCreated, newProduct)
 }
 
+// CreateNewProductCategory godoc
+// @Summary 카테고리 생성
+// @Description 새로운 상품 카테고리를 생성합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param body body models.ProductCategory true "카테고리 생성 요청"
+// @Success 201 {object} models.ProductCategory
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/product-categories [post]
 func (h *ProductHandler) CreateNewProductCategory(c *gin.Context) {
 	var productCategory models.ProductCategory
 	if err := c.ShouldBindJSON(&productCategory); err != nil {
@@ -107,6 +151,19 @@ func (h *ProductHandler) CreateNewProductCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, newCategory)
 }
 
+// EditProduct godoc
+// @Summary 상품 수정
+// @Description 상품 ID에 해당하는 상품 정보를 수정합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "상품 ID"
+// @Param body body models.Product true "상품 수정 요청"
+// @Success 200 {object} models.Product
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/products/{id} [put]
 func (h *ProductHandler) EditProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -139,6 +196,19 @@ func (h *ProductHandler) EditProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedProduct)
 }
 
+// EditProductCategory godoc
+// @Summary 카테고리 수정
+// @Description 카테고리 ID에 해당하는 카테고리 정보를 수정합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param id path int true "카테고리 ID"
+// @Param body body models.ProductCategory true "카테고리 수정 요청"
+// @Success 200 {object} models.ProductCategory
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/product-categories/{id} [put]
 func (h *ProductHandler) EditProductCategory(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -171,6 +241,17 @@ func (h *ProductHandler) EditProductCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedCategory)
 }
 
+// DeleteProductCategory godoc
+// @Summary 카테고리 삭제
+// @Description 카테고리 ID에 해당하는 카테고리를 삭제합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "카테고리 ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/product-categories/{id} [delete]
 func (h *ProductHandler) DeleteProductCategory(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -195,6 +276,17 @@ func (h *ProductHandler) DeleteProductCategory(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product category deleted successfully"})
 }
 
+// DeleteProduct godoc
+// @Summary 상품 삭제
+// @Description 상품 ID에 해당하는 상품을 삭제합니다.
+// @Tags PRODUCT
+// @Security BearerAuth
+// @Produce json
+// @Param id path int true "상품 ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/products/{id} [delete]
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -219,6 +311,15 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
 
+// GetProductRanking godoc
+// @Summary 상품 랭킹 조회
+// @Description 조회수/점수 기준 상위 상품 랭킹을 조회합니다.
+// @Tags PRODUCT
+// @Produce json
+// @Param limit query int false "랭킹 개수" default(10)
+// @Success 200 {array} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/products/ranking [get]
 func (h *ProductHandler) GetProductRanking(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err := strconv.ParseInt(limitStr, 10, 64)
@@ -244,6 +345,23 @@ func (h *ProductHandler) GetProductRanking(c *gin.Context) {
 	c.JSON(http.StatusOK, ranking)
 }
 
+// SearchProducts godoc
+// @Summary 상품 검색
+// @Description 이름/카테고리/가격/정렬 조건으로 상품을 검색합니다.
+// @Tags PRODUCT
+// @Produce json
+// @Param name query string false "상품명"
+// @Param category query string false "카테고리명"
+// @Param min_price query number false "최소 가격"
+// @Param max_price query number false "최대 가격"
+// @Param page query int false "페이지 번호" default(1)
+// @Param page_size query int false "페이지 크기" default(10)
+// @Param order_by query string false "정렬 컬럼"
+// @Param sort query string false "정렬 방향 (asc/desc)"
+// @Success 200 {object} models.SearchProductResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /v1/products/search [get]
 func (h *ProductHandler) SearchProducts(c *gin.Context) {
 	params := models.SearchProductParameter{
 		Name:     c.Query("name"),

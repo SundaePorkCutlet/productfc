@@ -1,0 +1,404 @@
+basePath: /
+definitions:
+  models.Product:
+    properties:
+      category:
+        $ref: '#/definitions/models.ProductCategory'
+      category_id:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+    type: object
+  models.ProductCategory:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.SearchProductResponse:
+    properties:
+      nextPageUrl:
+        type: string
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+host: localhost:28081
+info:
+  contact: {}
+  description: Product catalog, categories, and inventory for Go Commerce.
+  title: PRODUCTFC API
+  version: "1.0"
+paths:
+  /api/v1/product-categories:
+    post:
+      consumes:
+      - application/json
+      description: 새로운 상품 카테고리를 생성합니다.
+      parameters:
+      - description: 카테고리 생성 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductCategory'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ProductCategory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 카테고리 생성
+      tags:
+      - PRODUCT
+  /api/v1/product-categories/{id}:
+    delete:
+      description: 카테고리 ID에 해당하는 카테고리를 삭제합니다.
+      parameters:
+      - description: 카테고리 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 카테고리 삭제
+      tags:
+      - PRODUCT
+    put:
+      consumes:
+      - application/json
+      description: 카테고리 ID에 해당하는 카테고리 정보를 수정합니다.
+      parameters:
+      - description: 카테고리 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 카테고리 수정 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProductCategory'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductCategory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 카테고리 수정
+      tags:
+      - PRODUCT
+  /api/v1/products:
+    post:
+      consumes:
+      - application/json
+      description: 새로운 상품을 생성합니다.
+      parameters:
+      - description: 상품 생성 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 상품 생성
+      tags:
+      - PRODUCT
+  /api/v1/products/{id}:
+    delete:
+      description: 상품 ID에 해당하는 상품을 삭제합니다.
+      parameters:
+      - description: 상품 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 상품 삭제
+      tags:
+      - PRODUCT
+    put:
+      consumes:
+      - application/json
+      description: 상품 ID에 해당하는 상품 정보를 수정합니다.
+      parameters:
+      - description: 상품 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 상품 수정 요청
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 상품 수정
+      tags:
+      - PRODUCT
+  /v1/product-categories/{id}:
+    get:
+      description: 카테고리 ID로 카테고리를 조회합니다.
+      parameters:
+      - description: 카테고리 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductCategory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 카테고리 단건 조회
+      tags:
+      - PRODUCT
+  /v1/products/{id}:
+    get:
+      description: 상품 ID로 상품 정보를 조회합니다.
+      parameters:
+      - description: 상품 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 상품 단건 조회
+      tags:
+      - PRODUCT
+  /v1/products/ranking:
+    get:
+      description: 조회수/점수 기준 상위 상품 랭킹을 조회합니다.
+      parameters:
+      - default: 10
+        description: 랭킹 개수
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 상품 랭킹 조회
+      tags:
+      - PRODUCT
+  /v1/products/search:
+    get:
+      description: 이름/카테고리/가격/정렬 조건으로 상품을 검색합니다.
+      parameters:
+      - description: 상품명
+        in: query
+        name: name
+        type: string
+      - description: 카테고리명
+        in: query
+        name: category
+        type: string
+      - description: 최소 가격
+        in: query
+        name: min_price
+        type: number
+      - description: 최대 가격
+        in: query
+        name: max_price
+        type: number
+      - default: 1
+        description: 페이지 번호
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 페이지 크기
+        in: query
+        name: page_size
+        type: integer
+      - description: 정렬 컬럼
+        in: query
+        name: order_by
+        type: string
+      - description: 정렬 방향 (asc/desc)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SearchProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 상품 검색
+      tags:
+      - PRODUCT
+schemes:
+- http
+swagger: "2.0"
