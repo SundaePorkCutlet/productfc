@@ -137,9 +137,28 @@ func (r *ProductRepository) UpdateProductStockByProductID(ctx context.Context, p
 			return err
 		}
 		if product.Stock < qty {
-			return fmt.Errorf("insufficient stock for product %d: available=%d, requested=%d", productID, product.Stock, qty)
+			return fmt.Errorf("%w for product %d: available=%d, requested=%d", models.ErrInsufficientStock, productID, product.Stock, qty)
 		}
 		return tx.Model(&product).Update("stock", gorm.Expr("stock - ?", qty)).Error
+	})
+}
+
+func (r *ProductRepository) UpdateProductStocks(ctx context.Context, items []models.ProductItem) error {
+	return r.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for _, item := range items {
+			var product models.Product
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+				Where("id = ?", item.ProductID).First(&product).Error; err != nil {
+				return err
+			}
+			if product.Stock < item.Quantity {
+				return fmt.Errorf("%w for product %d: available=%d, requested=%d", models.ErrInsufficientStock, item.ProductID, product.Stock, item.Quantity)
+			}
+			if err := tx.Model(&product).Update("stock", gorm.Expr("stock - ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }
 
@@ -151,5 +170,21 @@ func (r *ProductRepository) AddProductStockByProductID(ctx context.Context, prod
 			return err
 		}
 		return tx.Model(&product).Update("stock", gorm.Expr("stock + ?", qty)).Error
+	})
+}
+
+func (r *ProductRepository) AddProductStocks(ctx context.Context, items []models.ProductItem) error {
+	return r.Database.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for _, item := range items {
+			var product models.Product
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+				Where("id = ?", item.ProductID).First(&product).Error; err != nil {
+				return err
+			}
+			if err := tx.Model(&product).Update("stock", gorm.Expr("stock + ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 }

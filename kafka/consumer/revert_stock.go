@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"time"
 
-	kafkapkg "productfc/kafka"
-	"productfc/kafka/dlq"
-	"productfc/kafka/idempotency"
 	"productfc/cmd/product/service"
 	"productfc/infrastructure/kafkamonitor"
 	"productfc/infrastructure/log"
+	kafkapkg "productfc/kafka"
+	"productfc/kafka/dlq"
+	"productfc/kafka/idempotency"
 	"productfc/models"
 
 	"github.com/segmentio/kafka-go"
@@ -85,14 +85,7 @@ func (c *ProductRollbackStockConsumer) Start(ctx context.Context) {
 
 		var lastErr error
 		for attempt := 0; attempt < 3; attempt++ {
-			lastErr = nil
-			for _, product := range event.Products {
-				err := c.ProductService.AddProductStockByProductID(ctx, product.ProductID, product.Quantity)
-				if err != nil {
-					lastErr = err
-					break
-				}
-			}
+			lastErr = c.ProductService.AddProductStocks(ctx, event.Products)
 			if lastErr == nil {
 				break
 			}

@@ -1,5 +1,9 @@
 package models
 
+import "errors"
+
+var ErrInsufficientStock = errors.New("insufficient stock")
+
 type ProductCategory struct {
 	ID   int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name string `gorm:"type:varchar(255);not null;unique" json:"name"`

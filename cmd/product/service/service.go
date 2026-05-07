@@ -151,6 +151,16 @@ func (s *ProductService) UpdateProductStockByProductID(ctx context.Context, prod
 	return nil
 }
 
+func (s *ProductService) UpdateProductStocks(ctx context.Context, items []models.ProductItem) error {
+	err := s.ProductRepo.UpdateProductStocks(ctx, items)
+	if err != nil {
+		return err
+	}
+
+	s.invalidateProductCaches(items, "Failed to invalidate product cache after stock update")
+	return nil
+}
+
 func (s *ProductService) AddProductStockByProductID(ctx context.Context, productID int64, qty int) error {
 	err := s.ProductRepo.AddProductStockByProductID(ctx, productID, qty)
 	if err != nil {
@@ -166,6 +176,31 @@ func (s *ProductService) AddProductStockByProductID(ctx context.Context, product
 	return nil
 }
 
+func (s *ProductService) AddProductStocks(ctx context.Context, items []models.ProductItem) error {
+	err := s.ProductRepo.AddProductStocks(ctx, items)
+	if err != nil {
+		return err
+	}
+
+	s.invalidateProductCaches(items, "Failed to invalidate product cache after stock add")
+	return nil
+}
+
 func (s *ProductService) GetTopProducts(ctx context.Context, limit int64) ([]models.ProductRankingItem, error) {
 	return s.ProductRepo.GetTopProducts(ctx, limit)
+}
+
+func (s *ProductService) invalidateProductCaches(items []models.ProductItem, msg string) {
+	go func() {
+		seen := make(map[int64]struct{}, len(items))
+		for _, item := range items {
+			if _, ok := seen[item.ProductID]; ok {
+				continue
+			}
+			seen[item.ProductID] = struct{}{}
+			if err := s.ProductRepo.InvalidateProductCache(context.Background(), item.ProductID); err != nil {
+				log.Logger.Error().Err(err).Msg(msg)
+			}
+		}
+	}()
 }

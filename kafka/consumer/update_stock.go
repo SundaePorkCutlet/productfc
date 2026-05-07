@@ -98,14 +98,7 @@ func (c *ProductUpdateStockConsumer) Start(ctx context.Context) {
 
 			var lastErr error
 			for attempt := 0; attempt < 3; attempt++ {
-				lastErr = nil
-				for _, product := range event.Products {
-					err := c.ProductService.UpdateProductStockByProductID(traceCtx, product.ProductID, product.Quantity)
-					if err != nil {
-						lastErr = err
-						break
-					}
-				}
+				lastErr = c.ProductService.UpdateProductStocks(traceCtx, event.Products)
 				if lastErr == nil {
 					break
 				}

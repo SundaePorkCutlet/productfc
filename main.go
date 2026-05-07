@@ -15,8 +15,8 @@ import (
 	"productfc/kafka/consumer"
 	"productfc/kafka/dlq"
 	"productfc/kafka/idempotency"
-	"productfc/models"
 	"productfc/middleware"
+	"productfc/models"
 	"productfc/routes"
 	"productfc/tracing"
 
@@ -62,13 +62,25 @@ func main() {
 
 	brokers := []string{"kafka:9092"}
 	idemStore := idempotency.NewStore(redis)
+	kafkaProducer := kafkapkg.NewProducer(brokers)
+	dlqOrderCreated := dlq.NewPublisher(brokers, kafkapkg.TopicDLQOrderCreated)
 	dlqUpdated := dlq.NewPublisher(brokers, kafkapkg.TopicDLQStockUpdated)
 	dlqRollback := dlq.NewPublisher(brokers, kafkapkg.TopicDLQStockRollback)
 	defer func() {
+		_ = kafkaProducer.Close()
+		_ = dlqOrderCreated.Close()
 		_ = dlqUpdated.Close()
 		_ = dlqRollback.Close()
 	}()
 	resource.KafkaMonitor = kafkamonitor.NewMonitor()
+
+	go func() {
+		orderCreatedConsumer := consumer.NewOrderCreatedConsumer(
+			brokers, kafkapkg.TopicOrderCreated, productService, kafkaProducer, idemStore, dlqOrderCreated, resource.KafkaMonitor,
+		)
+		orderCreatedConsumer.Start(context.Background())
+	}()
+	log.Logger.Info().Msg("Kafka order.created consumer started")
 
 	go func() {
 		kafkaProductUpdateStockConsumer := consumer.NewProductUpdateStockConsumer(
